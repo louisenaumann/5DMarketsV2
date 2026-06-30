@@ -1,97 +1,40 @@
-import torch
-import torch.nn as nn
+from dataset import MarketDataset
 
-from config import *
+from layers.observation_encoder import ObservationEncoder
+
+from layers.dvf_exogenous import DVFExogenous
 
 
-class DVFExogenous(nn.Module):
+dataset = MarketDataset()
 
-    """
-    M_D operator
+sample = dataset[0]
 
-    Exogenous shock field
+current_state = sample[0]
 
-    External events inject force
-    into market system
-    """
+current_state = current_state.unsqueeze(0)
 
-    def __init__(self):
+encoder = ObservationEncoder()
 
-        super().__init__()
+exo = DVFExogenous()
 
-        #
-        # transform shock vector
-        #
+latent = encoder(
+    current_state
+)
 
-        self.shock_transform = nn.Linear(
+output = exo(
+    latent
+)
 
-            LATENT_DIM,
+print()
 
-            LATENT_DIM
+print(
+    "Encoded shape:",
+    latent.shape
+)
 
-        )
+print(
+    "Exogenous DVF shape:",
+    output.shape
+)
 
-    def forward(self,
-                x):
-
-        #
-        # x shape
-        #
-        # [batch,
-        #  num_assets,
-        #  latent_dim]
-        #
-
-        batch_size = x.shape[0]
-
-        #
-        # generate global shock
-        #
-
-        shock = torch.randn(
-
-            batch_size,
-
-            1,
-
-            LATENT_DIM
-
-        )
-
-        #
-        # transform shock
-        #
-
-        shock = self.shock_transform(
-            shock
-        )
-
-        #
-        # broadcast to all assets
-        #
-
-        shock = shock.repeat(
-
-            1,
-
-            NUM_ASSETS,
-
-            1
-
-        )
-
-        #
-        # inject shock
-        #
-
-        output = (
-
-            x
-
-            +
-
-            shock
-
-        )
-
-        return output
+print()
