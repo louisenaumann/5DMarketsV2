@@ -23,7 +23,7 @@ class TemporalMemory(nn.Module):
 
             input_size = LATENT_DIM * NUM_ASSETS,
 
-            hidden_size=LATENT_DIM,
+            hidden_size=LATENT_DIM * NUM_ASSETS,
 
             batch_first=True
 
