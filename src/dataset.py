@@ -116,3 +116,4 @@ class MarketDataset(Dataset):
                 future,
                 dtype=torch.float32
             )
+        )
