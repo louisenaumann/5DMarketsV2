@@ -117,11 +117,18 @@ class FiveDMarkets(nn.Module):
         # temporary asset collapse
         #
 
-        fused = torch.mean(
+        #fused = torch.mean(
 
-            fused,
+        #    fused,
 
-            dim=1
+        #    dim=1
+
+        #)
+        fused = fused.view(
+
+            fused.shape[0],
+
+            -1
 
         )
 
