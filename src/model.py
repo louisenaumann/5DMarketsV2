@@ -13,6 +13,7 @@ from layers.fusion_operator import FusionOperator
 from layers.temporal_memory import TemporalMemory
 from layers.future_transition import FutureTransition
 from layers.decision_functional import DecisionFunctional
+from layers.reconstruction_head import ReconstructionHead
 
 
 class FiveDMarkets(nn.Module):
@@ -61,6 +62,8 @@ class FiveDMarkets(nn.Module):
         # decision output
         #
 
+        self.reconstruction = ReconstructionHead()
+        
         self.decision = DecisionFunctional()
 
     def forward(self,
@@ -150,9 +153,9 @@ class FiveDMarkets(nn.Module):
         # future trajectory
         #
 
-        future_output = self.future(
+        #future_output = self.future(
 
-            memory_output
+            #memory_output
 
         )
 
@@ -160,10 +163,25 @@ class FiveDMarkets(nn.Module):
         # decision outputs
         #
 
-        decision_output = self.decision(
+        #decision_output = self.decision(
+
+            #future_output
+
+        )
+
+        #return decision_output
+        #return future output
+
+        future_output = self.future(
+
+            memory_output
+
+        )
+
+        reconstructed = self.reconstruction(
 
             future_output
 
         )
 
-        return decision_output
+        return reconstructed
