@@ -157,7 +157,7 @@ class FiveDMarkets(nn.Module):
 
             #memory_output
 
-        )
+        #)
 
         #
         # decision outputs
@@ -167,7 +167,7 @@ class FiveDMarkets(nn.Module):
 
             #future_output
 
-        )
+        #)
 
         #return decision_output
         #return future output
