@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from src.config import *
+from config import *
 
 
 class ObservationEncoder(nn.Module):
