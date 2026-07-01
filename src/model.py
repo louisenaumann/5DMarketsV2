@@ -94,7 +94,7 @@ class FiveDMarkets(nn.Module):
             latent
         )
 
-        m_d = torch.zeros_like( #self.exogenous(
+        m_d = self.exogenous(
             latent
         )
 
