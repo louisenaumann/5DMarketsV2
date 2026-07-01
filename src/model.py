@@ -82,11 +82,11 @@ class FiveDMarkets(nn.Module):
         # deformation fields
         #
 
-        m_a = torch.zeros_like( #self.corr(
+        m_a = self.corr(
             latent
         )
 
-        m_b = self.sector(
+        m_b = torch.zeros_like( #self.sector(
             latent
         )
 
