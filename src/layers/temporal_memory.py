@@ -21,9 +21,9 @@ class TemporalMemory(nn.Module):
 
         self.lstm = nn.LSTM(
 
-            input_size = LATENT_DIM * NUM_ASSETS,
+            input_size = 256 #LATENT_DIM * NUM_ASSETS,
 
-            hidden_size=LATENT_DIM * NUM_ASSETS,
+            hidden_size= 256 #LATENT_DIM * NUM_ASSETS,
 
             batch_first=True
 
