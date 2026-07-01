@@ -1,5 +1,4 @@
-# 5DMarketsV2
-Simpler version, but read V1 first
+Simpler version, but read V1 first for more theory
 
 # 5DMarkets V2
 
