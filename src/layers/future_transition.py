@@ -21,7 +21,7 @@ class FutureTransition(nn.Module):
 
             nn.Linear(
 
-                256 #LATENT_DIM * NUM_ASSETS,
+                256, #LATENT_DIM * NUM_ASSETS,
 
                 256 #512
 
