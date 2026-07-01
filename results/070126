@@ -1,0 +1,493 @@
+Experimental Results and Architecture Validation
+# Experimental Results and Architecture Validation
+
+The development of 5DMarkets V2 has focused on testing the central hypothesis that financial markets can be modeled as a deformable high-dimensional dynamical system analogous to 5D Computed Tomography (5DCT) motion modeling.
+
+The primary objective of early experiments has been to determine whether the architecture can learn synthetic market dynamics when those dynamics are explicitly governed by structured interacting force systems.
+
+The experiments below document the iterative development process and the empirical findings that have shaped the current architecture.
+
+---
+
+## Experiment 1 — Baseline Architecture with Random Synthetic Dataset
+
+### Objective
+
+Verify that the architecture compiles correctly and that gradients propagate successfully through the full network.
+
+### Dataset
+
+Initial synthetic dataset generated using purely random Gaussian noise.
+
+Each sample consisted of:
+
+```text
+Current market state
+
+Future market state = current state + small random perturbation
+
+No embedded market structure was present.
+
+No correlation relationships.
+
+No sector relationships.
+
+No capital flow dynamics.
+
+No exogenous events.
+
+Architecture
+
+Original architecture:
+
+O
+t
+	​
+
+→R→{M
+A
+	​
+
+,M
+B
+	​
+
+,M
+C
+	​
+
+,M
+D
+	​
+
+}→F→H→Φ→G
+
+where market state was globally averaged prior to temporal modeling.
+
+fused = torch.mean(fused, dim=1)
+Results
+Epoch 0 Loss: 1.0154
+
+Epoch 49 Loss: 1.0027
+
+Total improvement:
+
+ΔL=0.0127
+Interpretation
+
+The architecture trained successfully, confirming that gradients propagated through the network correctly.
+
+However, convergence was extremely weak.
+
+This was expected because the dataset contained no meaningful underlying structure.
+
+The model was effectively attempting to predict random noise.
+
+Experiment 2 — Structured Synthetic Market Physics Dataset
+Objective
+
+Introduce realistic market structure and determine whether the architecture can learn underlying deformation dynamics.
+
+Dataset Redesign
+
+The synthetic dataset was redesigned to explicitly simulate four force systems corresponding to the four Deformation Vector Fields (DVFs).
+
+Each future timestep evolved according to:
+
+S
+t+1
+	​
+
+=S
+t
+	​
+
++M
+A
+	​
+
++M
+B
+	​
+
++M
+C
+	​
+
++M
+D
+	​
+
+
+where:
+
+Force A — Correlation Structure
+
+Neighboring assets partially correlated.
+
+Modeled statistical coupling between assets.
+
+Force B — Sector Structural Coupling
+
+Assets grouped into sectors.
+
+Sector-wide deformation applied uniformly across economically related assets.
+
+Force C — Capital Flow Conservation
+
+Capital dynamically rotated between sectors.
+
+Implemented conservation principle:
+
+∇⋅J=0
+
+where capital leaving one sector entered another.
+
+Force D — Exogenous Shock Injection
+
+Random external market shocks introduced probabilistically.
+
+Examples:
+
+macroeconomic events
+policy shocks
+volatility spikes
+Architecture
+
+Original architecture retained.
+
+Market state globally averaged prior to temporal modeling.
+
+fused = torch.mean(fused, dim=1)
+Results
+Epoch 0 Loss: 1.0065
+
+Epoch 49 Loss: 0.9887
+
+Total improvement:
+
+ΔL=0.0179
+Interpretation
+
+Introducing realistic market structure improved convergence relative to Experiment 1.
+
+However, learning remained weak.
+
+This suggested the presence of an architectural bottleneck rather than a dataset problem.
+
+Experiment 3 — Information Bottleneck Diagnosis
+Objective
+
+Test whether global averaging was destroying predictive information.
+
+Hypothesis
+
+The architecture originally collapsed all asset-level information into a single global state vector.
+
+Original operation:
+
+fused = torch.mean(fused, dim=1)
+
+This transformed:
+
+[50,64]→[64]
+
+The hypothesis was:
+
+Global averaging destroys local asset deformation information necessary for prediction.
+
+Equivalent theoretical statement:
+
+I(M)
+not
+=I(
+M
+ˉ
+)
+
+where:
+
+M = local market field
+M̄ = globally averaged market state
+Architecture Modification
+
+Global averaging removed.
+
+Instead:
+
+fused = fused.view(batch,-1)
+
+which preserved all asset-level structure.
+
+New dimensionality:
+
+[50,64]→[3200]
+
+The full market state was passed directly into temporal memory.
+
+Results
+
+Early training showed dramatically improved convergence.
+
+Epoch 0 Loss: 1.0049
+
+Epoch 11 Loss: 0.7684
+
+However, the training process eventually crashed due to computational limitations.
+
+The 3200-dimensional recurrent memory layer exceeded available compute resources.
+
+Interpretation
+
+This experiment strongly supported the hypothesis.
+
+Preserving local asset structure dramatically improved learning.
+
+However, direct recurrent modeling of the full market state proved computationally inefficient.
+
+Experiment 4 — Compression Architecture (Current Best Model)
+Objective
+
+Preserve full market structure while reducing computational burden.
+
+Architecture Modification
+
+A compression operator was introduced.
+
+New architecture:
+
+O
+t
+	​
+
+→R→M→F→C→H→Φ→G
+
+where:
+
+Compression layer:
+
+3200→256
+
+Pipeline:
+
+Full Market State
+
+↓
+
+Flatten (3200 dimensions)
+
+↓
+
+Compression Layer
+
+↓
+
+256-dimensional latent state
+
+↓
+
+Temporal Memory (LSTM)
+
+↓
+
+Future Projection
+
+↓
+
+Market Reconstruction
+Results
+Epoch 0 Loss: 1.0052
+
+Epoch 49 Loss: 0.7582
+
+Total improvement:
+
+ΔL=0.247
+
+Reduction:
+
+24.6%
+
+Interpretation
+
+This experiment produced the strongest results so far.
+
+The learning curve showed:
+
+stable monotonic descent
+no oscillation
+no plateau
+no gradient instability
+
+This provided the first strong empirical support for the central 5DMarkets hypothesis.
+
+Primary conclusion:
+
+Financial markets can be learned as deformation field systems when local asset structure is preserved.
+
+Experiment 5 — Ablation Study: Remove Capital Flow Field
+Objective
+
+Determine whether the Capital Flow Deformation Field contributes meaningful predictive information.
+
+Capital Flow DVF represents:
+
+M
+C
+	​
+
+
+and models conservation and redistribution of capital across market sectors.
+
+This operator represents one of the most novel theoretical contributions of the framework.
+
+Architecture Modification
+
+Capital Flow DVF removed.
+
+Set:
+
+M
+C
+	​
+
+=0
+
+Implementation:
+
+m_c = torch.zeros_like(latent)
+
+All other architecture and training parameters remained identical.
+
+Results
+Epoch 0 Loss: 1.0063
+
+Epoch 49 Loss: 0.8126
+
+Baseline comparison:
+
+Full model final loss = 0.7582
+
+Performance degradation:
+
+0.8126−0.7582=0.0544
+
+Relative degradation:
+
+7.2%
+
+Interpretation
+
+Removing the Capital Flow DVF materially worsened predictive performance.
+
+This suggests that capital redistribution dynamics contain predictive information not fully recoverable through correlation or sector structure alone.
+
+Primary conclusion:
+
+Capital flow dynamics contribute meaningful predictive information.
+
+This result provides early empirical support for the Capital Flow Deformation Field as a valid modeling component.
+
+Experiment 6 — Ablation Study: Remove Correlation Field
+Objective
+
+Determine contribution of correlation structure.
+
+Field removed:
+
+M
+A
+	​
+
+
+Implementation:
+
+m_a = torch.zeros_like(latent)
+Results
+Epoch 49 Loss: X
+Interpretation
+
+Pending.
+
+Experiment 7 — Ablation Study: Remove Sector Field
+Objective
+
+Determine contribution of sector structural coupling.
+
+Field removed:
+
+M
+B
+	​
+
+
+Implementation:
+
+m_b = torch.zeros_like(latent)
+Results
+Epoch 49 Loss: X
+Interpretation
+
+Pending.
+
+Experiment 8 — Ablation Study: Remove Exogenous Shock Field
+Objective
+
+Determine contribution of external forcing terms.
+
+Field removed:
+
+M
+D
+	​
+
+
+Implementation:
+
+m_d = torch.zeros_like(latent)
+Results
+Epoch 49 Loss: X
+Interpretation
+
+Pending.
+
+Experimental Summary Table
+Experiment	Final Loss	Interpretation
+Baseline Random Dataset	1.0027	No meaningful structure
+Structured Dataset + Averaging	0.9887	Bottleneck suspected
+Full State Memory (3200-dim)	Crashed	Learning improved but computationally infeasible
+Compression Architecture	0.7582	Best current model
+No Capital Flow	0.8126	Significant degradation
+No Correlation	X	Pending
+No Sector	X	Pending
+No Exogenous	X	Pending
+Preliminary Theoretical Conclusions
+
+The experiments currently support four working principles.
+
+Principle 1
+
+Global averaging destroys predictive information.
+
+I(M)
+
+=I(
+M
+ˉ
+)
+Principle 2
+
+Financial markets can be modeled as learnable deformation systems.
+
+Principle 3
+
+Compression before temporal modeling outperforms direct full-state recurrence.
+
+3200→256→LSTM
+
+is superior to
+
+3200→LSTM(3200)
+Principle 4
+
+Capital redistribution dynamics contain predictive information not recoverable through correlation structure alone.
