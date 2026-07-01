@@ -90,7 +90,7 @@ class FiveDMarkets(nn.Module):
             latent
         )
 
-        m_c = self.capital(
+        m_c = torch.zeros_like( #self.capital(
             latent
         )
 
