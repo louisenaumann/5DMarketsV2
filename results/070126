@@ -404,10 +404,9 @@ Implementation:
 
 m_a = torch.zeros_like(latent)
 Results
-Epoch 49 Loss: X
-Interpretation
+Epoch 49 Loss: 0.7709
+Interpretation: Minor degradation, more degradation than removing capital flow
 
-Pending.
 
 Experiment 7 — Ablation Study: Remove Sector Field
 Objective
