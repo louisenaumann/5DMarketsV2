@@ -31,7 +31,7 @@ class FutureTransition(nn.Module):
 
             nn.Linear(
 
-                512,
+                256,
 
                 LATENT_DIM * TRAJECTORY_LENGTH
 
