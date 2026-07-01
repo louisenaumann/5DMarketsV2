@@ -179,7 +179,7 @@ class FiveDMarkets(nn.Module):
         #return decision_output
         #return future output
 
-        print("Memory output shape:", memory_output.shape)
+        #print("Memory output shape:", memory_output.shape)
                     
         future_output = self.future(
 
