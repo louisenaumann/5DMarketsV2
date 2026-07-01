@@ -14,7 +14,7 @@ from layers.temporal_memory import TemporalMemory
 from layers.future_transition import FutureTransition
 from layers.decision_functional import DecisionFunctional
 from layers.reconstruction_head import ReconstructionHead
-
+from layers.compression_layer import CompressionLayer
 
 class FiveDMarkets(nn.Module):
 
@@ -40,6 +40,7 @@ class FiveDMarkets(nn.Module):
 
         self.exogenous = DVFExogenous()
 
+        self.compression = CompressionLayer()
         #
         # fusion
         #
@@ -128,15 +129,17 @@ class FiveDMarkets(nn.Module):
 
             fused.shape[0],
 
-            -1
+                -1
 
         )
 
-        #
-        # synthetic sequence
-        #
+        compressed = self.compression(
 
-        sequence = fused.unsqueeze(1).repeat(
+            fused
+
+        )
+
+        sequence = compressed.unsqueeze(1).repeat(
 
             1,
 
